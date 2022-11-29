@@ -2,7 +2,11 @@ import logo from './logo.svg';
 import './App.css';
 import Button from "./app/Button";
 import Image from "./app/views/image";
-import {Component} from "react";
+import React, {Component, useEffect} from "react";
+import ColorPicker from "./app/views/colorPicker";
+import RecognizeCompetitor from "./app/actions/RecognizeCompetitor";
+import AddCompetitor from "./app/actions/AddCompetitor";
+import LayerApp from "./app/layers/layerApp";
 
 
 class App extends Component {
@@ -10,8 +14,13 @@ class App extends Component {
 
         return (
             <div>
-
-                <Image />
+                <LayerApp />
+                {/*<Image />*/}
+                {/*<AddCompetitor />*/}
+                {/*/!*--------------------------------*!/*/}
+                {/*<br />*/}
+                {/*<RecognizeCompetitor />*/}
+                {/*<ColorPicker/>*/}
             </div>
         )
     }

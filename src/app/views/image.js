@@ -1,6 +1,6 @@
 import imagediff from "imagediff";
 import Webcam from "react-webcam";
-import {useCallback, useRef} from "react";
+import {useCallback, useRef, useState} from "react";
 import pixelmatch from "pixelmatch";
 import * as fs from "fs";
 var webcam;
@@ -10,14 +10,26 @@ const PNG = require('pngjs').PNG;
 
 const dataImage=[]
 const toUint8Array = require('base64-to-uint8array')
+
+const tf = require('@tensorflow/tfjs');
+const mobilenet = require('@tensorflow-models/mobilenet');
+const knnClassifier = require('@tensorflow-models/knn-classifier');
+//******TENSORFLOW-libs*********///
+
+const classifier = knnClassifier.create();
+var net;
+/////*******************////
 const Image = () => {
 // Create a variable from the first image
 
+    const [dataResultChanges,setDataResultChanges] = useState([]);
     /**
      * Callback that should be executed when the images are finally loaded.
      *
      **/
-    const onImagesLoaded = function (img1,img2) {
+    const onImagesLoaded = async function  (img1,img2) {
+        console.log("Cargando modelo de identificacion de imagenes");
+        net= await mobilenet.load();
 
         // const ImageA = document.getElementById("imageA");
         const ImageA = document.getElementById(img1);
@@ -169,7 +181,8 @@ const Image = () => {
         var imgDataOutput = new ImageData(wdth, hght);
 
         var numDiffPixels = pixelmatch(imgDataBefore.data, imgDataAfter.data,
-            imgDataOutput.data, wdth, hght, {threshold: 0.1,alpha:1});
+            // imgDataOutput.data, wdth, hght, {threshold: 0.1,alpha:1,diffColor:[147, 141, 170, 1]});
+            imgDataOutput.data, wdth, hght, {threshold: 0.1,alpha:0,diffColor:[255, 2, 0, 1]});
 
 
         // const canvasFinal =  document.createElement(numDiffPixels.width, numDiffPixels.height);
@@ -188,7 +201,11 @@ const Image = () => {
         // contextFinal.drawImage(numDiffPixels, 0, 0);
         console.log("canvas2", canvasFinal)
         // Add the canvas element to the div element to show
-        document.getElementById("result-container").appendChild(canvasFinal);
+        // document.getElementById("result-container").appendChild(canvasFinal);
+        let canvasURL = canvasFinal.toDataURL("image/jpeg",0.5)
+        const canvaElm = document.getElementById("resultCanvas")
+        canvaElm.setAttribute('src',canvasURL)
+
 
 
         ///////////////////////////////
@@ -196,12 +213,28 @@ const Image = () => {
         //We will start to drawing a rectangle
 
     }
+
+
+
+
     function convertImageToCanvas(imageID) {
         var image = document.getElementById(imageID);
         var canvas = document.createElement("canvas");
         canvas.width = image.width;
         canvas.height = image.height;
+
         canvas.getContext("2d").drawImage(image, 0, 0);
+        // image.style = "width: 400px";
+        return canvas;
+    }
+
+    function convertImageToCanvasXY(imageID,x,y) {
+        var image = document.getElementById(imageID);
+        var canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        canvas.getContext("2d").drawImage(image, x, y);
         // image.style = "width: 400px";
         return canvas;
     }
@@ -234,11 +267,242 @@ const Image = () => {
         return bytes.buffer;
     }
 ////////////////////////////////////////////////////////////
+//     const img = new Image();
+//     const canvas = document.getElementById('canvas');
+    let canvas;
+
+    let ctx;
+    const selectArea = async function () {
+        console.log("selectArea")
+        const image = document.getElementById("resultCanvas");
+        // console.log(image)
+        // document.getElementById("result-areaSelected").appendChild(image);
+        // console.log(image)
+        // const img = new Image();
+         canvas = document.getElementById('canvas');
+        // img.crossOrigin = 'anonymous';
+        // img.src = './assets/rhino.jpg';
+         ctx = canvas.getContext('2d');
+        // img.addEventListener('load', () => {
+        var cnvBefore = convertImageToCanvas("resultCanvas");
+            ctx.drawImage(cnvBefore, 0, 0);
+            // img.style.display = 'none';
+        // });
+        // canvas.addEventListener('mousemove', event => pick(event, hoveredColor));
+        canvas.addEventListener('click', event => pick(event, selectedColor));
+
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var pixels = imageData.data;
+        var numPixels = imageData.width * imageData.height;
+
+        // const rgbaDefault = `rgba(${147}, ${141}, ${170}, ${1})`;
+        const rgbaDefault = `rgba(${255}, ${255}, ${255}, ${1})`;
+        // const rgbaDefault = `rgba(${255}, ${2}, ${0}, ${1})`;
+        const rgbaDefaultArray = [255, 2, 0, 1];
+        // for (var i = 0; i < numPixels; i++) {
+        //     // const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
+        //     // const rgba = `rgba(${pixels[i*4]}, ${pixels[i*4+1]}, ${pixels[i*4+2]}, ${pixels[i*4+3] / 255})`;
+        //     let rgba = {r:0,g:0,b:0};
+        //     rgba.r += pixels[i];
+        //     rgba.g += pixels[i+1];
+        //     rgba.b += pixels[i+2];
+        //
+        //     // if(rgba===rgbaDefault){
+        //     if( rgba!==rgbaDefault) {
+        //         console.log(rgba)
+        //         const bounding = canvas.getBoundingClientRect();
+        //
+        //         const x = pixel.clientX - bounding.left;
+        //         const y = pixel.clientY - bounding.top;
+        //         console.log("detectedPlace", pixels[i],bounding,x,y)
+        //     }
+        //     // console.log(rgba)
+        //     // console.log(pixels[i*4])
+        // };
+
+
+        // const rgbaDefault = `rgba(${147}, ${141}, ${170}, ${1})`;
+        for(var j=0; j<imageData.width; j++){
+            for(var k=0; k<imageData.height; k++){
+                const bounding = canvas.getBoundingClientRect();
+                // const xi = j - bounding.left;
+                // const yi = k - bounding.top;
+                const x=j;
+                const y=k;
+                const imageByPixel = ctx.getImageData(x, y, 1, 1);
+                // const imageByPixel = ctx.getImageData(k, j, 1, 1);
+                const data = imageByPixel.data;
+                const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
+
+                const a = JSON.stringify(Array.from(data));
+                const b = JSON.stringify(Array.from(rgbaDefaultArray));
+
+                // console.log(rgba)
+                if (rgba !== rgbaDefault) {
+                // if (a === b) {
+                    // console.log("detectedPlace",j,k,x,y)
+                    // console.log("shouldbeRED")
+                    // console.log("detectedPlace",x,y)
+                    // console.log("rgba",rgba)
+                    dataResultChanges.push({position: {x: x, y: y}, color: rgba})
+                }
+            }
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(imageData, 0, 0);
+    }
+
+
+    const hoveredColor = document.getElementById('hovered-color');
+    const selectedColor = document.getElementById('selected-color');
+
+
+    function pick(event, destination) {
+        const bounding = canvas.getBoundingClientRect();
+        const x = event.clientX - bounding.left;
+        const y = event.clientY - bounding.top;
+        // console.log(x,event.clientX,bounding.left)
+        // console.log(y,event.clientY,bounding.top)
+        const pixel = ctx.getImageData(x, y, 1, 1);
+        const data = pixel.data;
+
+        const rgba = `rgba(${data[0]}, ${data[1]}, ${data[2]}, ${data[3] / 255})`;
+        // destination.style.background = rgba;
+        document.getElementById('hovered-color').style.background = rgba;
+        document.getElementById('selected-color').style.background = rgba;
+        console.log(rgba)
+        document.getElementById('hovered-color').textContent = rgba+'  ['+x+','+y+']';
+        document.getElementById('selected-color').textContent = rgba+'  ['+x+','+y+']';
+
+
+        return rgba;
+    }
+
+
+    const drawRectangle = async function (){
+        // console.log("data",dataResultChanges)
+        for(var i=0;i<10;i++){
+            const rndObject = dataResultChanges[Math.floor(Math.random() * dataResultChanges.length)];
+            drawRectangleImages(rndObject.position.x,rndObject.position.y,net)
+            console.log(rndObject.position.x,rndObject.position.y)
+        }
+
+    }
+
+    const drawRectangleImages = async function (posX,posY) {
+        var cnvBefore = convertImageToCanvas("imagenCamera2");
+        var ctxBefore = cnvBefore.getContext("2d");
+        // var imageData = ctx2.getImageData(159, 143, 200, 200);
+        // var imageData = ctx2.getImageData(259, 165, 200, 200);
+        // var imageData = ctx2.getImageData(277, 169, 200, 200);
+        // var imageData = ctx2.getImageData(264, 56, 200, 200);
+        ///////////
+        // let imgDataBefore = ctxBefore.getImageData(259,165,150, 150);
+
+        const hght = 100;
+        const wdth = 100;
+
+        // var imgDataOutput = new ImageData(100, 100);
+        //     imgDataOutput=imgDataBefore;
+
+        // const canvasFinal =  document.createElement(numDiffPixels.width, numDiffPixels.height);
+        const canvasFinal = document.createElement("canvas");
+        canvasFinal.addEventListener('click', event => pick(event, selectedColor));
+        canvasFinal.width = wdth;
+        canvasFinal.height = hght;
+        const contextFinal = canvasFinal.getContext('2d');
+        // Draw the generated image with differences on the canvas
+        // contextFinal.putImageData(imgDataOutput, 0, 0);
+
+        var image = document.getElementById('imagenCamera2');
+        // const IMG_HEIGTH=image.height;
+        // const IMG_WIDTH=image.width;
+        const IMG_HEIGTH=100;
+        const IMG_WIDTH=100;
+
+        contextFinal.drawImage(
+            // Image
+            image,
+            // ---- Selection ----
+            // 264, // sx
+            // 56, // sy
+            posX,
+            posY,
+            IMG_WIDTH, // sWidth
+            IMG_HEIGTH, // sHeight
+            // ---- Drawing ----
+            0, // dx
+            0, // dy
+            IMG_WIDTH, // dWidth
+            IMG_HEIGTH // dHeight
+        );
+
+        //con esto agregamos como child todas las imágenes al div como children
+        // document.getElementById("result-container").appendChild(canvasFinal);
+        let canvasURL = canvasFinal.toDataURL("image/jpeg",0.5)
+        const canvaElm = document.getElementById("resultCanvasRectangle")
+        canvaElm.setAttribute('src',canvasURL)
+
+        //AGREGAMOS EL RECONOCIMIENTO DE IMAGENES CON TENSORFLOW
+        const imgEl = document.getElementById("resultCanvasRectangle")
+        const result = await net.classify(imgEl);
+        console.log(result);
+    }
+
+    async function identifyImage(imgInput){
+        const img = imgInput
+
+        const result = await net.classify(img);
+        const activation = net.infer(img, 'conv_preds');
+        var result2;
+        try {
+            result2 = await classifier.predictClass(activation);
+        } catch (error) {
+            result2 = {};
+        }
+
+        const classes = ["Untrained", "Carla", "Nelson" , "Dino", "OK","Rock"]
+
+        document.getElementById('console').innerText = `
+      prediction: ${result[0].className}\n
+      probability: ${result[0].probability}
+    `;
+
+        try {
+            document.getElementById("console2").innerText = `
+    prediction: ${classes[result2.label]}\n
+    probability: ${result2.confidences[result2.label]}
+    `;
+        } catch (error) {
+            document.getElementById("console2").innerText="Untrained";
+        }
+        // Dispose the tensor to release the memory.
+        img.dispose();
+    }
+
+    const classes = ["Untrained", "Carla", "Nelson" , "Dino", "OK","Rock"]
+    var webcam;
+    //add example
+    async function addExample (classId) {
+        net= await mobilenet.load();
+        // const img = await webcam.capture();
+        // const img = webcamRef.current.getScreenshot();
+        const img=convertImageToCanvas('imagenCamera1')
+
+        // const img = document.getElementById('imagenCamera1')
+        const activation = net.infer(img, true);
+        classifier.addExample(activation, classId);
+        //liberamos el tensor
+        // img.dispose()
+    }
 
 ////////////////////////////////////////////////////////////
 // console.log(imageSrc1)
     return (
+
         <div>
+            <button id="clase-b" onClick={()=>addExample(2)}>Nelson</button>
+            <div id="console2"></div>
             <div id="loadContainer">
                 {/*<img  id="imageA" src="/src/app/img/example_a.png"/>*/}
                 {/*<img  id="imageA" src="/imgPublic/example_a.png" width="400px" height="400px"/>*/}
@@ -255,7 +519,7 @@ const Image = () => {
 
             <Webcam
                 audio={false}
-                height={300}
+                height={200}
                 ref={webcamRef}
                 screenshotFormat="image/jpeg"
                 width={400}
@@ -273,10 +537,22 @@ const Image = () => {
             <button onClick={()=>onImagesLoaded('imagenCamera1','imagenCamera2') } >Evaluate Imagen 2</button>
             <button onClick={()=>comparePixelMatch('imageA','imageB') } >Evaluate Imagen PIXELMATCH</button>
             <button onClick={()=>comparePixelMatch('imagenCamera1','imagenCamera2') } >Evaluate Imagen PIXELMATCH Camm</button>
+            <button onClick={()=>selectArea() } >SelectArea</button>
+            <button onClick={()=>drawRectangle() } >DrawRectangle</button>
 
             <div id="result-container" style={{width:'400px',height:'200px'}}></div>
             <br />
+            <div id="result-areaSelected" style={{width:'400px',height:'200px',borderStyle: 'solid'}}>
 
+                <img src="" id="resultCanvas" width="400px" height="200px"/>
+                <canvas id="canvas" width="400" height="200" style={{borderStyle: 'solid'}}></canvas>
+                <div>ColorPicked
+                    <div id="selected-color" style={{border:1,width:'100px', heigth:'100px'}} >xx</div>
+                    <div id="hovered-color"  style={{border:1,width:'100px', heigth:'100px'}}  >tt</div>
+                </div>
+                <canvas id="canvas22" width="400" height="200" style={{borderStyle: 'solid'}}></canvas>
+                <img src="" id="resultCanvasRectangle" width="100px" height="100px"/>
+            </div>
             <div
                 id="divImgSvgId2"
                 ref={refContainer}

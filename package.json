@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@tensorflow-models/knn-classifier": "^1.2.4",
+    "@tensorflow-models/mobilenet": "^2.1.0",
+    "@tensorflow/tfjs": "^4.0.0",
+    "@tensorflow/tfjs-converter": "^4.0.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^12.1.5",
     "@testing-library/user-event": "^13.5.0",
@@ -47,5 +51,10 @@
     "os": false,
     "net": false,
     "tls": false
+  },
+  "devDependencies": {
+    "@material-ui/core": "^4.12.4",
+    "@tensorflow/tfjs-react-native": "^0.8.0",
+    "expo-camera": "^13.0.0"
   }
 }
