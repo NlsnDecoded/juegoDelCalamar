@@ -16,7 +16,8 @@ const mobilenet = require('@tensorflow-models/mobilenet');
 const knnClassifier = require('@tensorflow-models/knn-classifier');
 //******TENSORFLOW-libs*********///
 
-const classifier = knnClassifier.create();
+// const classifier = knnClassifier.create();
+const classifier = {}
 var net;
 /////*******************////
 const Image = () => {
