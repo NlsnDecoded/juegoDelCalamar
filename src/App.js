@@ -7,6 +7,7 @@ import ColorPicker from "./app/views/colorPicker";
 import RecognizeCompetitor from "./app/actions/RecognizeCompetitor";
 import AddCompetitor from "./app/actions/AddCompetitor";
 import LayerApp from "./app/layers/layerApp";
+import TestLayer from "./app/layers/TestLayer";
 
 
 class App extends Component {
@@ -14,11 +15,13 @@ class App extends Component {
 
         return (
             <div>
-                <LayerApp />
+                <TestLayer />
+                {/*<LayerApp />*/}
+
                 {/*<Image />*/}
                 {/*<AddCompetitor />*/}
-                {/*/!*--------------------------------*!/*/}
-                {/*<br />*/}
+                {/*--------------------------------*/}
+                {/*<br /><span>Recognize Competitor</span>*/}
                 {/*<RecognizeCompetitor />*/}
                 {/*<ColorPicker/>*/}
             </div>

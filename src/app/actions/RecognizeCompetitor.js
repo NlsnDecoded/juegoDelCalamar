@@ -1,12 +1,14 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {convertImageToCanvas} from "../util/Util";
 import * as mobilenet from "@tensorflow-models/mobilenet";
 
 const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
+
     const classes = ["Untrained", "Carla", "Nelson" , "Paper", "CellPhone","Rock"]
     // const tf = require('@tensorflow/tfjs');
     const secondImage = 'secondImage';
     const descriptionSecondImage = 'descripcion_second_imagen';
+    const [turnONCamera,setTurnONCamera] = useState(false);
 
     async function recognizeImage() {
         const imgEl = await webcam.capture();
@@ -16,7 +18,7 @@ const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
         // const descEl = document.getElementById(descriptionSecondImage);
         // const result = await net.classify(imgEl);
         const activation = net.infer(imgEl, 'conv_preds');
-        var result2;
+        let result2;
         try {
 
             result2 = await classifier.predictClass(activation);
@@ -24,11 +26,14 @@ const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
             document.getElementById('console').innerText = `
              prediction: ${classes[result2.label]}\n
              probability: ${result2.confidences[result2.label]}`;
+
+
+
         } catch (error) {
             result2 = {};
         }
         imgEl.dispose();
-        // await tf.nextFrame();
+
 
         // console.log(result);
         // console.log("result2::: ",result2);
@@ -36,25 +41,33 @@ const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
     }
 
 
+    useEffect(() => {
+        // console.log("estatusCamera::", turnONCamera)
+console.log(recognizeviaCamera())
+    }, [turnONCamera])
 
 
     async function recognizeviaCamera() {
+        // const imagenCapture = await webcam.capture();
+        // const predictions = await net.infer(document.getElementById("webcam"), 'conv_preds');
+        // const predictions = await net.infer(imagenCapture, 'conv_preds');
+        // const resultx = await classifier?.predictClass(predictions);
+        // console.log(resultx)
 
-
-        // net= await mobilenet.load();
         //obtenemos datos del webcam
         // const webcamElement = document.getElementById('webcam');
         //  webcam = await tf.data.webcam(webcamElement,{resizeHeight:200,resizeWidth:200})
-        console.log(net,webcam,classifier)
-        while (true) {
+        // console.log(net,webcam,classifier)
+        console.log("beforeClassifier",classifier)
+        while (turnONCamera) {
             const img = await webcam.capture();
             const result = await net.classify(img);
             const activation = net.infer(img, 'conv_preds');
-
+        // console.log("afterClassifier",classifier)
             var result2;
             try {
                 result2 = await classifier.predictClass(activation);
-                console.log(result2)
+                console.log(classes[result2.label])
                 document.getElementById('console').innerText = `
       prediction: ${result[0].className}\n
       probability: ${result[0].probability}
@@ -76,7 +89,7 @@ const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
 
             // Give some breathing room by waiting for the next animation frame to
             // fire.
-            await tf.nextFrame();
+
         }
     }
 
@@ -115,7 +128,7 @@ const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
     const loadKnn = async ()=>{
         const storageKey = "knnClassifier";
         let datasetJson = localStorage.getItem(storageKey);
-        classifier.setClassifierDataset(Object.fromEntries(JSON.parse(datasetJson).map(([label, data, shape]) => [label, tf.tensor(data, shape)])));
+        classifier.setClassifierDataset(Object.fromEntries(JSON.parse(datasetJson)?.map(([label, data, shape]) => [label, tf.tensor(data, shape)]) ||[]));
     };
 
     return <>
@@ -124,7 +137,8 @@ const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
             <button id="btnLoadKnnId" onClick={() => loadKnn()}>LOAD KNN</button>
             <div>
                 <button id="btnRecognize" onClick={() => recognizeImage()}>Recognize Imagen</button>
-                <button id="btnRecognize" onClick={() => recognizeviaCamera()}>Recognize Imagen via Camera</button>
+                {/*<button id="btnRecognize" onClick={() => recognizeviaCamera()}>Recognize Imagen via Camera</button>*/}
+                <button id="btnRecognize" onClick={() => setTurnONCamera(!turnONCamera)}>Recognize Imagen via Camera</button>
                 <div id={descriptionSecondImage}></div>
             </div>
             <div>

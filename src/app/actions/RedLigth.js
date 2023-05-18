@@ -2,7 +2,7 @@ import React, {useState} from "react";
 import pixelmatch from "pixelmatch";
 import {convertImageToCanvas} from "../util/Util"
 
-const RedLigth = ({webcamRef}) => {
+const RedLigth = ({webcamRef, predictImageFunction}) => {
     const initialImage = 'initialImage';
     const secondImage = 'secondImage';
 
@@ -82,10 +82,12 @@ const RedLigth = ({webcamRef}) => {
 
 //Here we draw the rectangles image to detect who moved
     const drawRectangle = async function (){
-        for(var i=0;i<100;i++){
+        for(var i=0;i<700;i++){
             const rndObject = dataResultChanges[Math.floor(Math.random() * dataResultChanges.length)];
-            await drawRectangleImages(rndObject.position.x, rndObject.position.y,i)
-            console.log(rndObject.position.x,rndObject.position.y)
+            const imageDrawed = await drawRectangleImages(rndObject.position.x, rndObject.position.y,i)
+            //here we can try to detect who is in the image
+                predictImageFunction(imageDrawed)
+            // console.log(rndObject.position.x,rndObject.position.y)
         }
 
     }
@@ -132,6 +134,7 @@ const RedLigth = ({webcamRef}) => {
         canvaElm.setAttribute('height','200px')
         canvaElm.setAttribute('src',canvasURL)
         document.getElementById("result-container").appendChild(canvaElm);
+        return canvaElm;
     }
 
     const removeChilds = async function () {

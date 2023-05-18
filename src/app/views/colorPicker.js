@@ -3,7 +3,7 @@
 const ColorPicker=()=>{
     const img = new Image();
     const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas?.getContext('2d');
 
         console.log("selectArea")
         // const image = document.getElementById("resultCanvas");
@@ -43,8 +43,8 @@ const ColorPicker=()=>{
         }
     }
 
-    canvas.addEventListener('mousemove', event => pick(event, hoveredColor));
-    canvas.addEventListener('click', event => pick(event, selectedColor));
+    canvas?.addEventListener('mousemove', event => pick(event, hoveredColor));
+    canvas?.addEventListener('click', event => pick(event, selectedColor));
 
     return <div>
         <canvas id="canvas" width="400" height="200"></canvas>
