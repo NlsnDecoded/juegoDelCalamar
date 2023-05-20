@@ -5,6 +5,7 @@ import SaveKnn from "../actions/SaveKnn";
 import Webcam from "react-webcam";
 import tf from "@tensorflow/tfjs";
 import RedLigth from "../actions/RedLigth";
+import LoadKnn from "../actions/LoadKnn";
 // import tf from "@tensorflow/tfjs";
 // import {KNNClassifier} from "@tensorflow-models/knn-classifier"
 // import {MobileNet} from "@tensorflow-models/mobilenet"
@@ -178,6 +179,11 @@ try {
         </div>
         <button id="btnNelson5" onClick={()=>predictImg()}>Predict</button>
         <button id="btnNelson5" onClick={()=>resultCompetitor()}>Result Competitor</button>
+
+        <div> <span> LOAD AND SAVE  KNN</span>
+            {netLoaded && model && webcam && webcamElement? <LoadKnn classifier={classifier} tf={tf}/>:<div>empty</div>}
+            {netLoaded && model && webcam && webcamElement? <SaveKnn net={model} classifier={classifier} />:<div>empty</div>}
+        </div>
 
         <RedLigth webcamRef={webcamRef} predictImageFunction={predictImgExported} updateDataResultChanges={updateDataResultChanges}  />
     </>
