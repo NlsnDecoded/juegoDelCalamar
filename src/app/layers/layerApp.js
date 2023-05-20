@@ -14,12 +14,10 @@ const LayerApp = () => {
     const mobilenet = require('@tensorflow-models/mobilenet');
     const knnClassifier = require('@tensorflow-models/knn-classifier');
 
-    let [net,setNet] = useState(null);
-    // let [classifier,setClassifier] = useState(null);
+        // let [classifier,setClassifier] = useState(null);
     let [netLoaded,setNetLoaded] = useState(false);
     let [webcam,setWebcam] = useState(null);
-    let [tensorFlow,setTensorFlow] = useState(null);
-    let [classifier,setClassifier] = useState(knnClassifier.create());
+    let [classifier] = useState(knnClassifier.create());
 
 
     const webcamRef = useRef(null);
@@ -85,6 +83,7 @@ const LayerApp = () => {
         tf.ready().then(() => {
             loadModel();
         });
+        // eslint-disable-next-line
     }, []);
 
     const videoConstraints = {
@@ -110,7 +109,7 @@ const LayerApp = () => {
         {netLoaded && model && webcam && webcamElement? <AddCompetitor net={model} classifier={classifier} webcam={webcam} tf={tf}  webcamElement={webcamElement}/>:<div>empty</div>}
         <br />
         {netLoaded && model && webcam && webcamElement? <RecognizeCompetitor net={model} classifier={classifier} webcam={webcam} tf={tf} webcamElement={webcamElement} />:<div>empty</div>}
-        {netLoaded && model && webcam && webcamElement? <SaveKnn net={model} classifier={classifier} />:<div>empty</div>}
+        {netLoaded && model && webcam && webcamElement? <SaveKnn classifier={classifier} />:<div>empty</div>}
 
     </>
 }

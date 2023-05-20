@@ -20,14 +20,14 @@ export function convertImageToCanvasXY(imageID,x,y) {
     return canvas;
 }
 
-export async function base64ToFile(dataURL, fileName) {
-    const arr = dataURL.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    return (fetch(dataURL)
-        .then(function (result) {
-            return result.arrayBuffer();
-        }));
-}
+// export async function base64ToFile(dataURL, fileName) {
+//     const arr = dataURL.split(',');
+//     const mime = arr[0].match(/:(.*?);/)[1];
+//     return (fetch(dataURL)
+//         .then(function (result) {
+//             return result.arrayBuffer();
+//         }));
+// }
 
 
 export function _base64ToArrayBufferxx(base64) {
@@ -42,7 +42,7 @@ export async function _base64ToArrayBuffer(base64) {
     const binary_string = base64;
     const len = binary_string.length;
     const bytes = new Uint8Array(len);
-    for (const i = 0; i < len; i++) {
+    for (let i = 0; i < len; i++) {
         bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes.buffer;

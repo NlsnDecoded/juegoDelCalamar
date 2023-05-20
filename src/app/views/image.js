@@ -2,18 +2,14 @@ import imagediff from "imagediff";
 import Webcam from "react-webcam";
 import {useCallback, useRef, useState} from "react";
 import pixelmatch from "pixelmatch";
-import * as fs from "fs";
-var webcam;
-const webcamElement = document.getElementById('webcam');
+// import * as fs from "fs";
 
 const PNG = require('pngjs').PNG;
 
 const dataImage=[]
 const toUint8Array = require('base64-to-uint8array')
 
-const tf = require('@tensorflow/tfjs');
 const mobilenet = require('@tensorflow-models/mobilenet');
-const knnClassifier = require('@tensorflow-models/knn-classifier');
 //******TENSORFLOW-libs*********///
 
 // const classifier = knnClassifier.create();
@@ -552,7 +548,7 @@ const Image = () => {
                     <div id="hovered-color"  style={{border:1,width:'100px', heigth:'100px'}}  >tt</div>
                 </div>
                 <canvas id="canvas22" width="400" height="200" style={{borderStyle: 'solid'}}></canvas>
-                <img src="" id="resultCanvasRectangle" width="100px" height="100px"/>
+                <img src="" id="resultCanvasRectangle" width="100px" height="100px" alt="resultCanvasRectangle"/>
             </div>
             <div
                 id="divImgSvgId2"

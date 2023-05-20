@@ -1,6 +1,4 @@
-import React, {useEffect, useState} from "react";
-import {convertImageToCanvas} from "../util/Util";
-import * as mobilenet from "@tensorflow-models/mobilenet";
+import React from "react";
 
 const LoadKnn = ({classifier, tf}) => {
     const loadKnn = async ()=>{

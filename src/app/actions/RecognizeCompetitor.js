@@ -1,12 +1,9 @@
 import React, {useEffect, useState} from "react";
-import {convertImageToCanvas} from "../util/Util";
-import * as mobilenet from "@tensorflow-models/mobilenet";
 
 const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
 
     const classes = ["Untrained", "Carla", "Nelson" , "Paper", "CellPhone","Rock"]
     // const tf = require('@tensorflow/tfjs');
-    const secondImage = 'secondImage';
     const descriptionSecondImage = 'descripcion_second_imagen';
     const [turnONCamera,setTurnONCamera] = useState(false);
 
@@ -20,21 +17,14 @@ const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
         const activation = net.infer(imgEl, 'conv_preds');
         let result2;
         try {
-
             result2 = await classifier.predictClass(activation);
-
             document.getElementById('console').innerText = `
              prediction: ${classes[result2.label]}\n
              probability: ${result2.confidences[result2.label]}`;
-
-
-
         } catch (error) {
             result2 = {};
         }
         imgEl.dispose();
-
-
         // console.log(result);
         // console.log("result2::: ",result2);
         // descEl.innerHTML = JSON.stringify(result2);
@@ -43,7 +33,8 @@ const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
 
     useEffect(() => {
         // console.log("estatusCamera::", turnONCamera)
-console.log(recognizeviaCamera())
+        console.log(recognizeviaCamera())
+        // eslint-disable-next-line
     }, [turnONCamera])
 
 

@@ -1,12 +1,6 @@
-import React, {useState} from "react";
-import {convertImageToCanvas} from "../util/Util";
-import * as mobilenet from "@tensorflow-models/mobilenet";
+import React from "react";
 
-const SaveKnn = ({net,classifier, webcam}) => {
-    const classes = ["Untrained", "Carla", "Nelson" , "Paper", "CellPhone","Rock"]
-    const tf = require('@tensorflow/tfjs');
-    const secondImage = 'secondImage';
-    const descriptionSecondImage = 'descripcion_second_imagen';
+const SaveKnn = ({classifier}) => {
 
     const saveKnn = async () => {
         //obtenemos el dataset actual del clasificador (labels y vectores)

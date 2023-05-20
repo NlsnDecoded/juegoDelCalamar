@@ -1,28 +1,17 @@
 import React, {useEffect, useRef, useState} from "react";
-import AddCompetitor from "../actions/AddCompetitor";
-import RecognizeCompetitor from "../actions/RecognizeCompetitor";
 import SaveKnn from "../actions/SaveKnn";
 import Webcam from "react-webcam";
-import tf from "@tensorflow/tfjs";
 import RedLigth from "../actions/RedLigth";
 import LoadKnn from "../actions/LoadKnn";
-// import tf from "@tensorflow/tfjs";
-// import {KNNClassifier} from "@tensorflow-models/knn-classifier"
-// import {MobileNet} from "@tensorflow-models/mobilenet"
-// import * as MobileNet from "@tensorflow-models/mobilenet";
-// import * as tf  from "@tensorflow/tfjs";
 
 const TestLayer = () => {
     const tf = require('@tensorflow/tfjs');
     const mobilenet = require('@tensorflow-models/mobilenet');
     const knnClassifier = require('@tensorflow-models/knn-classifier');
 
-    let [net,setNet] = useState(null);
-    // let [classifier,setClassifier] = useState(null);
     let [netLoaded,setNetLoaded] = useState(false);
     let [webcam,setWebcam] = useState(null);
-    let [tensorFlow,setTensorFlow] = useState(null);
-    let [classifier,setClassifier] = useState(knnClassifier.create());
+    let [classifier] = useState(knnClassifier.create());
 
 
     const webcamRef = useRef(null);
@@ -33,7 +22,7 @@ const TestLayer = () => {
     //Competitors
     const classes = ["Untrained", "Carla", "Nelson", "Paper", "CellPhone", "Rock"]
     //
-    let [counterDetection,setCounterDetection] = useState({});
+    let [counterDetection] = useState({});
 
 
 
@@ -61,28 +50,26 @@ const TestLayer = () => {
         facingMode: "user"
     };
 
-    async function addExample (classId) {
-try {
-    // await tf.data.webcam(webcamElement, {resizeHeight: 200, resizeWidth: 200}).then(async result => {
-    //     const img = await webcam.capture();
-        const img = webcamRef.current.video;
-        const activation = model.infer(img, true);
-        classifier.addExample(activation, classId);
-        //liberamos el tensor
-        // img.dispose()
-
-    // })
-}catch (e){
-    console.log("error",e)
-}
-
-
-
+    async function addExample(classId) {
+        try {
+            // await tf.data.webcam(webcamElement, {resizeHeight: 200, resizeWidth: 200}).then(async result => {
+            //     const img = await webcam.capture();
+            const img = webcamRef.current.video;
+            const activation = model.infer(img, true);
+            classifier.addExample(activation, classId);
+            //liberamos el tensor
+            // img.dispose()
+            // })
+        } catch (e) {
+            console.log("error", e)
+        }
     }
+
     useEffect(() => {
         tf.ready().then(() => {
             loadModel();
         });
+        // eslint-disable-next-line
     }, []);
 
 
@@ -182,7 +169,7 @@ try {
 
         <div> <span> LOAD AND SAVE  KNN</span>
             {netLoaded && model && webcam && webcamElement? <LoadKnn classifier={classifier} tf={tf}/>:<div>empty</div>}
-            {netLoaded && model && webcam && webcamElement? <SaveKnn net={model} classifier={classifier} />:<div>empty</div>}
+            {netLoaded && model && webcam && webcamElement? <SaveKnn classifier={classifier} />:<div>empty</div>}
         </div>
 
         <RedLigth webcamRef={webcamRef} predictImageFunction={predictImgExported} updateDataResultChanges={updateDataResultChanges}  />
