@@ -1,6 +1,6 @@
-import React, {useRef} from "react";
+import React from "react";
 
-const AddCompetitor = ({net, classifier, webcam, tf}) => {
+const AddCompetitor = ({net, classifier, webcam}) => {
     // const tf = require('@tensorflow/tfjs');
     // const classes = ["Untrained", "Carla", "Nelson" , "Paper", "CellPhone","Rock"]
 

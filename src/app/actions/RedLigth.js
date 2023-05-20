@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import pixelmatch from "pixelmatch";
 import {convertImageToCanvas} from "../util/Util"
-import kmeans, {kmeansGenerator} from "ml-kmeans";
+// import kmeans, {kmeansGenerator} from "ml-kmeans";
 
 
 const RedLigth = ({webcamRef, predictImageFunction, updateDataResultChanges}) => {
@@ -12,7 +12,7 @@ const RedLigth = ({webcamRef, predictImageFunction, updateDataResultChanges}) =>
     const secondImage = 'secondImage';
     //precisionDifference:: Matching threshold, ranges from 0 to 1. Smaller values make the comparison more sensitive. 0.1 by default.
     const precisionDifference = 0.3;
-    let [percentImageChanged,setPercentImageChanged] =useState(0);
+    let [percentImageChanged] =useState(0);
 
     async function captureInitialImage(imageId) {
         const imageSrc = await webcamRef.current.getScreenshot();
@@ -58,9 +58,9 @@ const RedLigth = ({webcamRef, predictImageFunction, updateDataResultChanges}) =>
     //Fill all the dotImages as redColor to get the position
     let canvas;
     let ctx;
-    const [dataResultChanges,setDataResultChanges] = useState([]);
-    const [dataResultChangesForClustering,setDataResultChangesForClustering] = useState([]);
-    let [resultDataClustering,setResultDataClustering] = useState([]);
+    const [dataResultChanges] = useState([]);
+    const [dataResultChangesForClustering] = useState([]);
+    let [resultDataClustering] = useState([]);
     const selectArea = async function () {
         console.log("selectArea")
         canvas = document.getElementById('canvas');
@@ -70,7 +70,7 @@ const RedLigth = ({webcamRef, predictImageFunction, updateDataResultChanges}) =>
         var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
         const rgbaDefault = `rgba(${255}, ${255}, ${255}, ${1})`;
-        const rgbaDefaultArray = [255, 2, 0, 1];
+        // const rgbaDefaultArray = [255, 2, 0, 1];
 
         for(var j=0; j<imageData.width; j++){
             for(var k=0; k<imageData.height; k++){
@@ -196,19 +196,19 @@ const RedLigth = ({webcamRef, predictImageFunction, updateDataResultChanges}) =>
         <div style={{display:'flex'}}>
             <div id="captureInitialImageId" style={{backgroundColor:'yellow', paddingTop:'1em'}} title="InitialImg">
             <button id="btnUntrained" onClick={() => captureInitialImage(initialImage)}>Capture Initial Image</button>
-            <img src="" id={initialImage} width="400px" height="200px"/>
+            <img src="" id={initialImage} width="400px" height="200px" alt={"initImage"} />
             </div>
 
             <div id="captureSecondImageId" style={{backgroundColor:'#66CFFF', paddingTop:'1em'}} title="SecondImg">
                 <button id="btnUntrained" onClick={() => captureInitialImage(secondImage)}>Capture Second Image</button>
-                <img src="" id={secondImage} width="400px" height="200px"/>
+                <img src="" id={secondImage} width="400px" height="200px" alt={"secondImage"}/>
             </div>
         </div>
         <div id="differencesId" style={{backgroundColor:'#66C333', paddingTop:'1em'}} title="DifferencesImg">
             <span>DIFERENCIAS</span>
             <button id="btnUntrained" onClick={() => comparePixelMatch(initialImage,secondImage)}>Watch differences</button>
             <br />
-            <img src="" id="resultCanvas" width="400px" height="200px"/>
+            <img src="" id="resultCanvas" width="400px" height="200px" alt={"resultCanves"}/>
         </div>
         <div id="areaDifferencesId" style={{backgroundColor:'#9999FF', paddingTop:'1em'}} title="drawPicesOfImage">
             <button onClick={()=>selectArea() } >SelectArea</button>
@@ -223,7 +223,7 @@ const RedLigth = ({webcamRef, predictImageFunction, updateDataResultChanges}) =>
             <button onClick={()=>removeChilds() } >REMOVE CHILDS</button>
             <br />
             <div id="result-container" style={{width:'400px',height:'200px'}}></div>
-            <img src="" id="resultCanvasRectangle" width="100px" height="100px"/>
+            <img src="" id="resultCanvasRectangle" width="100px" height="100px" alt={"resultCanvasRectangle"}/>
         </div>
     </>
 }

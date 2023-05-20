@@ -22,7 +22,7 @@ const RecognizeCompetitor = ({net,classifier, webcam, tf}) => {
              prediction: ${classes[result2.label]}\n
              probability: ${result2.confidences[result2.label]}`;
         } catch (error) {
-            result2 = {};
+            console.log("errorOnResult2")
         }
         imgEl.dispose();
         // console.log(result);
