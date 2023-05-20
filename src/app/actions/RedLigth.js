@@ -1,10 +1,18 @@
 import React, {useState} from "react";
 import pixelmatch from "pixelmatch";
 import {convertImageToCanvas} from "../util/Util"
+import kmeans, {kmeansGenerator} from "ml-kmeans";
 
-const RedLigth = ({webcamRef, predictImageFunction}) => {
+
+const RedLigth = ({webcamRef, predictImageFunction, updateDataResultChanges}) => {
+    const kmeans = require('ml-kmeans');
+    const numberOfClusters = 40; // Number of aggregate dots desired
+
     const initialImage = 'initialImage';
     const secondImage = 'secondImage';
+    //precisionDifference:: Matching threshold, ranges from 0 to 1. Smaller values make the comparison more sensitive. 0.1 by default.
+    const precisionDifference = 0.3;
+    let [percentImageChanged,setPercentImageChanged] =useState(0);
 
     async function captureInitialImage(imageId) {
         const imageSrc = await webcamRef.current.getScreenshot();
@@ -29,12 +37,13 @@ const RedLigth = ({webcamRef, predictImageFunction}) => {
         var imgDataOutput = new ImageData(wdth, hght);
         var numDiffPixels = pixelmatch(imgDataBefore.data, imgDataAfter.data,
             // imgDataOutput.data, wdth, hght, {threshold: 0.1,alpha:1,diffColor:[147, 141, 170, 1]});
-            imgDataOutput.data, wdth, hght, {threshold: 0.1,alpha:0,diffColor:[255, 2, 0, 1]});
+            imgDataOutput.data, wdth, hght, {threshold: precisionDifference ,alpha:0,diffColor:[255, 2, 0, 1]});
         // const canvasFinal =  document.createElement(numDiffPixels.width, numDiffPixels.height);
         const canvasFinal = document.createElement("canvas");
         canvasFinal.width = wdth;
         canvasFinal.height = hght;
-        console.log( wdth*hght,"Porcentaje Modificado:"+ (numDiffPixels*100)/(wdth*hght) )
+        percentImageChanged = ((numDiffPixels*100)/(wdth*hght));
+        console.log( wdth*hght,"Porcentaje Modificado:"+ percentImageChanged )
         const contextFinal = canvasFinal.getContext('2d');
         // Draw the generated image with differences on the canvas
         contextFinal.putImageData(imgDataOutput, 0, 0);
@@ -50,6 +59,8 @@ const RedLigth = ({webcamRef, predictImageFunction}) => {
     let canvas;
     let ctx;
     const [dataResultChanges,setDataResultChanges] = useState([]);
+    const [dataResultChangesForClustering,setDataResultChangesForClustering] = useState([]);
+    let [resultDataClustering,setResultDataClustering] = useState([]);
     const selectArea = async function () {
         console.log("selectArea")
         canvas = document.getElementById('canvas');
@@ -71,25 +82,60 @@ const RedLigth = ({webcamRef, predictImageFunction}) => {
 
                 if (rgba !== rgbaDefault) {
                     dataResultChanges.push({position: {x: x, y: y}, color: rgba})
+                    dataResultChangesForClustering.push([x,y])
                 }
             }
         }
         console.log(dataResultChanges)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.putImageData(imageData, 0, 0);
+
+        //actualizamos La Función con el tamaño de las diferencias
+        updateDataResultChanges(dataResultChanges.length)
+        //Hacemos el Clustering también
+        await kClustering()
+    }
+
+
+    const kClustering = async function (){
+        console.log("kClustering")
+        // Extract the coordinates from the dots array
+        //         const data = dataResultChanges.map(dot => [dot.x, dot.y]);
+
+        // Perform k-means clustering
+        //         const kmeans = new KMeansResult();
+                // const { clusters, centroids } = kmeans.cluster(data, numberOfClusters);
+                // const { clusters, centroids } = kmeans.kmeans(data, numberOfClusters); //kmeansGenerator(data, numberOfClusters);
+                resultDataClustering = kmeans.kmeans(dataResultChangesForClustering, numberOfClusters);
+                console.log("CLUSTER AND CENTROIDS", resultDataClustering, resultDataClustering.centroids )
+                // console.log(clusters,centroids)
     }
 
 
 //Here we draw the rectangles image to detect who moved
     const drawRectangle = async function (){
-        for(var i=0;i<700;i++){
-            const rndObject = dataResultChanges[Math.floor(Math.random() * dataResultChanges.length)];
-            const imageDrawed = await drawRectangleImages(rndObject.position.x, rndObject.position.y,i)
-            //here we can try to detect who is in the image
-                predictImageFunction(imageDrawed)
-            // console.log(rndObject.position.x,rndObject.position.y)
-        }
+        if(percentImageChanged>0){
+            // for(var i=0;i<dataResultChanges.length;i++){
+            const kMeansCentroidsResult= resultDataClustering.centroids;
+            for(var i=0;i<kMeansCentroidsResult.length;i++){
+            // for(var i=0;i<50;i++){
+            //     const rndObject = dataResultChanges[Math.floor(Math.random() * dataResultChanges.length)];
+            //     const imageDrawed = await drawRectangleImages(rndObject.position.x, rndObject.position.y,i)
+            //---esta mal     const rndObject = dataResultChangesForClustering[Math.floor(Math.random() * dataResultChanges.length)];
 
+                //newCodeTry using the clustering centroids Result----
+                const imageDrawed = await drawRectangleImages(kMeansCentroidsResult[i][0], kMeansCentroidsResult[i][1],i)
+                //-------
+                //here we can try to detect who is in the image
+                    predictImageFunction(imageDrawed)
+                //here we need to work to get the right number of rectangles to try to draw and based on confidence try to identify the person
+                //into rectangle that moved.
+
+                // console.log(rndObject.position.x,rndObject.position.y)
+            }
+        }else{
+            console.log("nothing to draw as Rectangles")
+        }
     }
 
     const drawRectangleImages = async function (posX,posY,indexId) {
@@ -168,6 +214,9 @@ const RedLigth = ({webcamRef, predictImageFunction}) => {
             <button onClick={()=>selectArea() } >SelectArea</button>
             <br />
             <canvas id="canvas" width="400" height="200" style={{borderStyle: 'solid'}}></canvas>
+        </div>
+        <div>
+            <button onClick={()=>kClustering() } >KClustering</button>
         </div>
         <div id="rectanglesImgId" style={{backgroundColor:'#faa74a', paddingTop:'1em'}} title="drawPicesOfImage">
             <button onClick={()=>drawRectangle() } >DrawRectangleImages</button>

@@ -29,6 +29,11 @@ const TestLayer = () => {
 
     const [model, setModel] = useState();
 
+    //Competitors
+    const classes = ["Untrained", "Carla", "Nelson", "Paper", "CellPhone", "Rock"]
+    //
+    let [counterDetection,setCounterDetection] = useState({});
+
 
 
     async function loadModel() {
@@ -93,7 +98,7 @@ try {
             result2 = {};
         }
 
-        const classes = ["Untrained", "Carla", "Nelson", "Paper", "CellPhone", "Rock"]
+        // const classes = ["Untrained", "Carla", "Nelson", "Paper", "CellPhone", "Rock"]
 
         try {
             console.log(classes[result2.label], result2.confidences[result2.label])
@@ -115,13 +120,38 @@ try {
             result2 = {};
         }
 
-        const classes = ["Untrained", "Carla", "Nelson", "Paper", "CellPhone", "Rock"]
+        // const classes = ["Untrained", "Carla", "Nelson", "Paper", "CellPhone", "Rock"]
 
         try {
-            console.log(classes[result2.label], result2.confidences[result2.label])
+            const competitor = classes[result2.label];
+            const confidence = result2.confidences[result2.label];
+            if(confidence===1){
+                if(Object.keys(counterDetection)?.find(itm=> itm===competitor)){
+                // if(Object.keys(counterDetection)?.find(itm2=> counterDetection[itm2]===competitor))
+                //     Object.keys(counterDetection).map(itm=> itm[competitor]? {...itm[competitor], [competitor]:itm[competitor]+1 }:itm )
+                    counterDetection= {...counterDetection, [competitor]:counterDetection[competitor]+1 }
+                }else{
+                    counterDetection[competitor]=1
+                }
+                console.log(counterDetection)
+                // console.log(classes[result2.label], result2.confidences[result2.label])
+            }
         } catch (error) {
-            document.getElementById("console2").innerText = "Untrained";
+            console.log("errror",error)
+            // document.getElementById("console2").innerText = "Untrained";
         }
+    }
+
+    const updateDataResultChanges = async (dataResultLenght) => {
+        try {
+            console.log("dataResultOn TestLayer::",dataResultLenght)
+        } catch (error) {
+            console.log("errorOnUpdateDataResultTestLayer")
+        }
+    }
+
+    const resultCompetitor = () => {
+        console.log("resultCompetitor::",counterDetection)
     }
 
     return <>
@@ -147,8 +177,9 @@ try {
             <button id="btnNelson5" onClick={()=>addExample(5)}>Rock</button>
         </div>
         <button id="btnNelson5" onClick={()=>predictImg()}>Predict</button>
+        <button id="btnNelson5" onClick={()=>resultCompetitor()}>Result Competitor</button>
 
-        <RedLigth webcamRef={webcamRef} predictImageFunction={predictImgExported} />
+        <RedLigth webcamRef={webcamRef} predictImageFunction={predictImgExported} updateDataResultChanges={updateDataResultChanges}  />
     </>
 }
 

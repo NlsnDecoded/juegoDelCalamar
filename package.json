@@ -13,6 +13,7 @@
     "babel-plugin-preval": "^5.1.0",
     "base64-to-uint8array": "^1.0.0",
     "imagediff": "^1.0.8",
+    "ml-kmeans": "^6.0.0",
     "pixelmatch": "^5.2.1",
     "pngjs": "^6.0.0",
     "react": "^18.0.0",
